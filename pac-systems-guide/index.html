@@ -493,7 +493,7 @@
           steps: [
             "Take a clear photo or scan of the receipt.",
             "Drop it in the <strong>Event Receipts</strong> folder — the only receipts folder. Nowhere else.",
-            "The receipt scan picks it up automatically and creates your Payment Tracker row — never type a new row by hand.",
+            "The receipt scan picks it up automatically and creates your Payment Tracker row (Tracker tab) — never type a new row by hand.",
             "Complete your row: <strong>Paid By, Amount, Account, Event/Project, Payee, Ref #</strong>.",
             "Done — Gaming rows flow into the Gaming Ledger by themselves."
           ],
@@ -504,10 +504,11 @@
           what: "PAC money is spent by approval, not by habit. The Spending Approval form comes before any purchase, and two signatories sign off in writing before the status flips to APPROVED.",
           steps: [
             "<strong>Approval comes BEFORE spending.</strong> Fill in the Spending Approval form at the commitment point — use the pre-filled link on the Trello card if there is one.",
-            "The Suggested Account fills itself in; the Treasurer confirms Gaming items.",
-            "Two signatories approve in writing — from the three signatories (Treasurer, President, VP) — and the <strong>second approval must come from the President or VP</strong>. Status flips to APPROVED. Nobody approves a payment to themselves.",
+            "Your form lands on the <strong>Form Responses 1</strong> tab of the Payment Tracker — that's where approvals happen. The Suggested Account fills itself in; the Treasurer confirms Gaming items.",
+            "Approvers mark their columns right there (<strong>Approved — President, Approved — VP</strong>); when both are in, the Status flips to APPROVED. Two signatories approve in writing — from the three signatories (Treasurer, President, VP), the <strong>second must be the President or VP</strong>. Nobody approves a payment to themselves.",
             "Pay the vendor directly where possible.",
-            "Receipt goes to Event Receipts; complete your tracker row."
+            "Receipt goes to Event Receipts; complete your tracker row.",
+            "There is no separate approval sheet — approvals, expenses and the Gaming Ledger all live in the one Payment Tracker workbook."
           ],
           where: [{ t: "Spending Approval form", u: LINKS.form }, { t: "Payment Tracker", u: LINKS.tracker }], sop: 5
         },
@@ -645,13 +646,13 @@
             {
               tag: "✦ Automation", tagClass: "",
               title: "The tracker picks it up",
-              text: "The response lands in the Payment Tracker. The Suggested Account fills itself in; the Treasurer confirms Gaming items.",
+              text: "The response lands on the Form Responses 1 tab of the Payment Tracker. The Suggested Account fills itself in; the Treasurer confirms Gaming items.",
               visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.tracker, "Payment Tracker") + '</div><div class="mock-row new"><span class="grow">Harvest Festival — $150</span><span class="pill pill-pale">Suggested: Fundraising</span></div><div class="mock-row"><span class="grow">Treasurer confirms Gaming items</span><span class="check">✓</span></div></div></div>'
             },
             {
               tag: "The rule", tagClass: "human",
               title: "Two signatories approve",
-              text: "Two signatories approve in writing — and the second approval must come from the President or VP. The status flips to APPROVED.",
+              text: "Two signatories approve in writing — and the second approval must come from the President or VP. The status flips to APPROVED (marked in the approval columns on the same tab).",
               visual: '<div class="mock"><div class="mock-card"><div class="mock-label">Approvals</div><div class="mock-row"><span class="grow">Approval 1 of 2 — in writing</span><span class="check">✓</span></div><div class="mock-row"><span class="grow">Approval 2 of 2 — President or VP</span><span class="check">✓</span></div><div class="mock-row new"><span class="grow">Status</span><span class="pill pill-green">APPROVED</span></div></div></div>'
             },
             {
@@ -703,7 +704,8 @@
             "<strong>Spending Approval before spending</strong> — always.",
             "Three signatories (Treasurer, President, VP); <strong>two approvals</strong> needed, and the <strong>second must come from the President or VP</strong>. Nobody approves a payment to themselves.",
             "Receipts go to the <strong>Event Receipts</strong> folder — the scan creates the tracker row; you complete it.",
-            "Gaming rows build the <strong>Gaming Ledger</strong> automatically."
+            "Gaming rows build the <strong>Gaming Ledger</strong> automatically.",
+            "One workbook for all PAC money: the <strong>Payment Tracker</strong> holds the Spending Approval responses and approvals (<strong>Form Responses 1</strong> tab), every expense (<strong>Tracker</strong> tab) and the Gaming Ledger — there is no separate approval sheet."
           ] },
         { n: 6, title: "Fundraising", sum: "Selling → Fundraising; maybe Gaming is the Treasurer's call; never Gaming has hard lines.",
           points: [
