@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="data:," />
+    <title>PAC Systems Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Open+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --green: #3b9349;
+        --green-deep: #2e7d3b;
+        --green-bright: #57c46a;
+        --red: #ca3843;
+        --red-soft: #e05760;
+        --charcoal: #363435;
+        --pale: #eaf3ec;
+        --warm: #f4f1ec;
+        --glass: rgba(255, 255, 255, 0.1);
+        --glass-strong: rgba(255, 255, 255, 0.16);
+        --glass-border: rgba(255, 255, 255, 0.28);
+        --glass-border-soft: rgba(255, 255, 255, 0.16);
+        --ink: #ffffff;
+        --ink-dim: rgba(255, 255, 255, 0.78);
+        --ink-faint: rgba(255, 255, 255, 0.58);
+        --shadow: 0 18px 50px rgba(2, 24, 10, 0.45);
+        --radius: 22px;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: "Open Sans", system-ui, sans-serif;
+        color: var(--ink);
+        min-height: 100vh;
+        background:
+          radial-gradient(1200px 700px at 15% -10%, #22663a 0%, rgba(34, 102, 58, 0) 60%),
+          linear-gradient(155deg, #0a2f1a 0%, #0e3b21 38%, #1e5631 78%, #16442a 100%);
+        background-attachment: fixed;
+        overflow-x: hidden;
+      }
+      /* ---- ambient glow blobs ---- */
+      .blob {
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(90px);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .blob-green { width: 520px; height: 520px; background: rgba(87, 196, 106, 0.32); top: -160px; right: -120px; }
+      .blob-deep { width: 460px; height: 460px; background: rgba(20, 90, 48, 0.55); bottom: -180px; left: -140px; }
+      .blob-red { width: 300px; height: 300px; background: rgba(202, 56, 67, 0.22); top: 46%; left: 62%; }
+      @media (prefers-reduced-motion: no-preference) {
+        .blob-green { animation: drift 26s ease-in-out infinite alternate; }
+        .blob-red { animation: drift 32s ease-in-out infinite alternate-reverse; }
+        @keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(-46px, 34px) scale(1.08); } }
+      }
+
+      .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 28px 18px 40px; }
+
+      /* ---- header ---- */
+      header.hero { padding: 18px 6px 8px; }
+      .hero .school {
+        font-family: "Montserrat", sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+        color: var(--green-bright);
+        margin: 0 0 10px;
+      }
+      .hero h1 {
+        font-family: "Montserrat", sans-serif;
+        font-weight: 800;
+        font-size: clamp(2.1rem, 6vw, 3.4rem);
+        line-height: 1.05;
+        margin: 0 0 12px;
+      }
+      .hero h1 .accent { color: var(--green-bright); }
+      .hero p.lede { font-size: clamp(1rem, 2.4vw, 1.18rem); color: var(--ink-dim); max-width: 640px; margin: 0; line-height: 1.55; }
+      .hero .red-rule { width: 64px; height: 5px; border-radius: 3px; background: var(--red); margin: 20px 0 0; }
+
+      /* ---- glass panel base ---- */
+      .glass {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px) saturate(140%);
+        -webkit-backdrop-filter: blur(18px) saturate(140%);
+      }
+
+      /* ---- tabs ---- */
+      nav.tabs {
+        display: flex; gap: 10px; margin: 26px 0 22px; padding: 8px;
+        position: sticky; top: 10px; z-index: 30;
+      }
+      nav.tabs button {
+        flex: 1 1 0; min-height: 62px; border: 1px solid transparent; border-radius: 16px;
+        background: transparent; color: var(--ink-dim); cursor: pointer;
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: clamp(0.85rem, 2.6vw, 1.05rem);
+        display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 8px;
+        transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+      }
+      nav.tabs button .num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%; flex: 0 0 auto;
+        background: rgba(255, 255, 255, 0.14); border: 1px solid var(--glass-border-soft);
+        font-size: 0.9rem;
+      }
+      nav.tabs button:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+      nav.tabs button[aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(87, 196, 106, 0.35), rgba(46, 125, 59, 0.45));
+        border-color: var(--glass-border); color: #fff;
+        box-shadow: 0 10px 26px rgba(2, 24, 10, 0.35);
+      }
+      nav.tabs button[aria-selected="true"] .num { background: var(--red); border-color: transparent; color: #fff; }
+      nav.tabs button:focus-visible, .tile:focus-visible, .btn:focus-visible, .sop-head:focus-visible,
+      .journey-tab:focus-visible, .dot:focus-visible, .modal-close:focus-visible, a:focus-visible { outline: 3px solid var(--green-bright); outline-offset: 2px; }
+
+      section.panel { display: none; }
+      section.panel.active { display: block; }
+      @media (prefers-reduced-motion: no-preference) {
+        section.panel.active { animation: fadeUp 0.35s ease both; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+      }
+      .panel-intro { color: var(--ink-dim); font-size: 1.02rem; line-height: 1.55; margin: 2px 4px 18px; max-width: 700px; }
+      .panel-intro strong { color: #fff; }
+
+      /* ---- scenario tiles ---- */
+      .tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      @media (max-width: 640px) { .tiles { grid-template-columns: 1fr; } }
+      .tile {
+        display: flex; align-items: center; gap: 16px; text-align: left; width: 100%;
+        min-height: 96px; padding: 18px 20px; cursor: pointer; color: var(--ink);
+        font-family: inherit; transition: transform 0.15s ease, background 0.2s ease;
+      }
+      .tile:hover { background: var(--glass-strong); transform: translateY(-2px); }
+      .tile .icon {
+        flex: 0 0 auto; width: 56px; height: 56px; border-radius: 16px;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, rgba(87, 196, 106, 0.4), rgba(46, 125, 59, 0.5));
+        border: 1px solid var(--glass-border-soft);
+      }
+      .tile .icon svg { width: 30px; height: 30px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .tile .t-title { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 1.12rem; line-height: 1.25; display: block; }
+      .tile .t-sub { display: block; color: var(--ink-faint); font-size: 0.88rem; margin-top: 4px; }
+      .tile .chev { margin-left: auto; flex: 0 0 auto; color: var(--ink-faint); font-size: 1.5rem; line-height: 1; }
+
+      /* ---- modal ---- */
+      .modal-backdrop {
+        position: fixed; inset: 0; z-index: 60; display: none;
+        background: rgba(4, 22, 11, 0.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+        align-items: flex-end; justify-content: center;
+      }
+      .modal-backdrop.open { display: flex; }
+      @media (min-width: 700px) { .modal-backdrop { align-items: center; padding: 24px; } }
+      .modal {
+        width: 100%; max-width: 640px; max-height: 88vh; overflow-y: auto;
+        border-radius: 26px 26px 0 0; padding: 26px 26px 30px;
+        background: rgba(16, 58, 33, 0.72);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(26px) saturate(150%); -webkit-backdrop-filter: blur(26px) saturate(150%);
+      }
+      @media (min-width: 700px) { .modal { border-radius: 26px; } }
+      @media (prefers-reduced-motion: no-preference) {
+        .modal-backdrop.open .modal { animation: slideUp 0.3s ease both; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+      }
+      .modal-top { display: flex; align-items: flex-start; gap: 14px; }
+      .modal-top .icon {
+        flex: 0 0 auto; width: 52px; height: 52px; border-radius: 15px;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, rgba(87, 196, 106, 0.4), rgba(46, 125, 59, 0.5));
+        border: 1px solid var(--glass-border-soft);
+      }
+      .modal-top .icon svg { width: 28px; height: 28px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .modal h2 { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 1.45rem; margin: 4px 0 0; line-height: 1.2; }
+      .modal-close {
+        margin-left: auto; flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%;
+        border: 1px solid var(--glass-border-soft); background: rgba(255, 255, 255, 0.1);
+        color: #fff; font-size: 1.25rem; cursor: pointer; line-height: 1;
+      }
+      .modal-close:hover { background: rgba(255, 255, 255, 0.2); }
+      .modal .what { color: var(--ink-dim); line-height: 1.6; margin: 16px 0 18px; font-size: 1.02rem; }
+      .modal h3 {
+        font-family: "Montserrat", sans-serif; font-size: 0.8rem; font-weight: 700;
+        letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-bright); margin: 20px 0 10px;
+      }
+      ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+      ol.steps li {
+        counter-increment: step; position: relative; padding: 0 0 14px 46px; line-height: 1.55; color: var(--ink);
+      }
+      ol.steps li::before {
+        content: counter(step); position: absolute; left: 0; top: -2px;
+        width: 30px; height: 30px; border-radius: 50%;
+        background: var(--green-deep); border: 1px solid var(--glass-border-soft);
+        display: flex; align-items: center; justify-content: center;
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.9rem;
+      }
+      ol.steps li:last-child { padding-bottom: 2px; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+      .chip {
+        display: inline-flex; align-items: center; gap: 7px; padding: 9px 14px; border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1); border: 1px solid var(--glass-border-soft);
+        font-size: 0.88rem; font-weight: 600; color: #fff;
+      }
+      .chip .lock { width: 14px; height: 14px; stroke: var(--green-bright); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .chip.sop-chip { background: rgba(202, 56, 67, 0.22); border-color: rgba(224, 87, 96, 0.45); }
+      .chip.sop-chip button {
+        background: none; border: none; color: #fff; font: inherit; cursor: pointer; padding: 0; text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      a.chip { text-decoration: none; }
+      .chip-link {
+        background: var(--pale); color: var(--green-deep); border-color: rgba(255, 255, 255, 0.55);
+        transition: background 0.2s ease, transform 0.15s ease;
+      }
+      .chip-link .lock { stroke: var(--green-deep); }
+      .chip-link:hover { background: #ffffff; transform: translateY(-1px); }
+      .chip-link .ext { font-weight: 700; }
+      .mock-link {
+        display: inline-block; background: var(--pale); color: var(--green-deep);
+        padding: 2px 10px; border-radius: 999px; text-decoration: none; font-weight: 700;
+      }
+      .mock-link:hover { background: #ffffff; }
+      .sop-link {
+        display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; padding: 10px 18px;
+        border-radius: 999px; background: var(--pale); color: var(--green-deep);
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.92rem; text-decoration: none;
+        transition: background 0.2s ease, transform 0.15s ease;
+      }
+      .sop-link:hover { background: #ffffff; transform: translateY(-1px); }
+      .handbook-link {
+        display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 12px 22px;
+        border-radius: 999px; background: var(--pale); color: var(--green-deep); box-shadow: var(--shadow);
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.95rem; text-decoration: none;
+        transition: background 0.2s ease, transform 0.15s ease;
+      }
+      .handbook-link:hover { background: #ffffff; transform: translateY(-1px); }
+      .roles-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+      .roles-list li {
+        display: flex; gap: 12px; align-items: baseline; padding: 12px 14px; border-radius: 14px;
+        background: rgba(255, 255, 255, 0.07); border: 1px solid var(--glass-border-soft); line-height: 1.45;
+      }
+      .roles-list .r-name { font-family: "Montserrat", sans-serif; font-weight: 700; white-space: nowrap; }
+      .roles-list .r-role { color: var(--green-bright); font-weight: 700; font-size: 0.85rem; white-space: nowrap; }
+      .roles-list .r-desc { color: var(--ink-dim); font-size: 0.93rem; }
+      @media (max-width: 480px) { .roles-list li { flex-wrap: wrap; } }
+
+      /* ---- journey switcher ---- */
+      .journey-switch { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+      .journey-tab {
+        flex: 1 1 220px; min-height: 58px; border-radius: 16px; cursor: pointer;
+        background: rgba(255, 255, 255, 0.07); border: 1px solid var(--glass-border-soft);
+        color: var(--ink-dim); font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 1rem;
+        padding: 12px 16px; transition: background 0.2s ease, color 0.2s ease;
+      }
+      .journey-tab:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+      .journey-tab.active {
+        background: linear-gradient(135deg, rgba(202, 56, 67, 0.5), rgba(202, 56, 67, 0.28));
+        border-color: rgba(224, 87, 96, 0.55); color: #fff;
+      }
+
+      /* ---- stage ---- */
+      .stage { padding: 26px 26px 24px; }
+      .stage-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+      .stage-count { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+      .stage-tag {
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.06em;
+        padding: 6px 12px; border-radius: 999px; background: rgba(202, 56, 67, 0.3);
+        border: 1px solid rgba(224, 87, 96, 0.5); color: #ffd9dc;
+      }
+      .stage-tag.human { background: rgba(87, 196, 106, 0.22); border-color: rgba(87, 196, 106, 0.45); color: #d8f5de; }
+      .stage-visual {
+        min-height: 190px; border-radius: 18px; padding: 22px;
+        background: rgba(6, 32, 17, 0.35); border: 1px solid var(--glass-border-soft);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .stage-title { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: clamp(1.3rem, 3.6vw, 1.7rem); margin: 20px 0 8px; line-height: 1.25; }
+      .stage-text { color: var(--ink-dim); font-size: 1.05rem; line-height: 1.6; margin: 0; max-width: 640px; }
+      .stage-nav { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 24px; flex-wrap: wrap; }
+      .btn {
+        min-height: 56px; padding: 12px 24px; border-radius: 999px; cursor: pointer;
+        font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 1rem;
+        border: 1px solid var(--glass-border-soft); transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+      }
+      .btn-primary { background: linear-gradient(135deg, var(--green-bright), var(--green-deep)); color: #fff; border-color: transparent; box-shadow: 0 10px 24px rgba(2, 24, 10, 0.4); }
+      .btn-primary:hover { transform: translateY(-1px); }
+      .btn-ghost { background: rgba(255, 255, 255, 0.08); color: #fff; }
+      .btn-ghost:hover { background: rgba(255, 255, 255, 0.16); }
+      .btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+      .dots { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+      .dot {
+        width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--glass-border);
+        background: rgba(255, 255, 255, 0.15); cursor: pointer; padding: 0;
+      }
+      .dot.done { background: rgba(87, 196, 106, 0.6); }
+      .dot.current { background: var(--red); border-color: rgba(255, 255, 255, 0.6); transform: scale(1.25); }
+
+      /* ---- stage mock visuals ---- */
+      .mock { width: 100%; max-width: 460px; }
+      .mock-card {
+        background: rgba(255, 255, 255, 0.12); border: 1px solid var(--glass-border-soft);
+        border-radius: 14px; padding: 14px 16px; margin-bottom: 10px;
+      }
+      .mock-card:last-child { margin-bottom: 0; }
+      .mock-label { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-bright); margin-bottom: 6px; }
+      .mock-line { height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.28); margin: 7px 0; }
+      .mock-line.short { width: 55%; } .mock-line.med { width: 75%; }
+      .mock-line.faint { background: rgba(255, 255, 255, 0.16); }
+      .mock-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.08); margin-bottom: 8px; font-size: 0.92rem; }
+      .mock-row:last-child { margin-bottom: 0; }
+      .mock-row.new { background: rgba(87, 196, 106, 0.25); border: 1px solid rgba(87, 196, 106, 0.5); }
+      .mock-row .grow { flex: 1; }
+      .pill { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 0.72rem; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.04em; white-space: nowrap; }
+      .pill-green { background: var(--green-deep); color: #fff; }
+      .pill-red { background: var(--red); color: #fff; }
+      .pill-pale { background: var(--pale); color: var(--green-deep); }
+      .mock-big { font-size: 3rem; text-align: center; line-height: 1.1; }
+      .mock-caption { text-align: center; color: var(--ink-dim); font-size: 0.95rem; margin-top: 8px; }
+      .scan-wrap { position: relative; overflow: hidden; border-radius: 14px; }
+      .scan-bar { position: absolute; left: 0; right: 0; height: 34%; top: 0;
+        background: linear-gradient(180deg, rgba(87, 196, 106, 0), rgba(87, 196, 106, 0.35), rgba(87, 196, 106, 0)); }
+      @media (prefers-reduced-motion: no-preference) {
+        .scan-bar { animation: sweep 2.6s ease-in-out infinite; }
+        @keyframes sweep { 0%, 100% { top: -10%; } 50% { top: 76%; } }
+        .pulse { animation: pulse 2s ease-in-out infinite; display: inline-block; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+      }
+      .check { color: var(--green-bright); font-weight: 700; }
+
+      /* ---- SOP accordion ---- */
+      .sops { display: grid; gap: 12px; }
+      .sop { overflow: hidden; }
+      .sop-head {
+        width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; cursor: pointer;
+        background: none; border: none; color: var(--ink); padding: 18px 20px; min-height: 76px; font-family: inherit;
+      }
+      .sop-num {
+        flex: 0 0 auto; width: 40px; height: 40px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(202, 56, 67, 0.28); border: 1px solid rgba(224, 87, 96, 0.4);
+        font-family: "Montserrat", sans-serif; font-weight: 800; font-size: 1rem;
+      }
+      .sop-title { font-family: "Montserrat", sans-serif; font-weight: 700; font-size: 1.08rem; display: block; }
+      .sop-sum { display: block; color: var(--ink-faint); font-size: 0.9rem; margin-top: 3px; line-height: 1.45; }
+      .sop-chev { margin-left: auto; flex: 0 0 auto; font-size: 1.3rem; color: var(--ink-faint); transition: transform 0.25s ease; }
+      .sop.open .sop-chev { transform: rotate(180deg); }
+      .sop-body { display: none; padding: 2px 20px 20px 74px; }
+      .sop.open .sop-body { display: block; }
+      @media (max-width: 560px) { .sop-body { padding-left: 20px; } }
+      .sop-body ul { margin: 0; padding: 0; list-style: none; }
+      .sop-body li { position: relative; padding: 0 0 10px 24px; line-height: 1.55; color: var(--ink-dim); }
+      .sop-body li::before { content: ""; position: absolute; left: 2px; top: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--green-bright); }
+      .sop-body li strong { color: #fff; }
+
+      footer { margin-top: 34px; text-align: center; }
+      footer p {
+        display: inline-block; padding: 14px 22px; border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07); border: 1px solid var(--glass-border-soft);
+        color: var(--ink-faint); font-size: 0.88rem; line-height: 1.5; margin: 0;
+      }
+      @media (max-width: 640px) {
+        nav.tabs { gap: 6px; padding: 6px; }
+        nav.tabs button { flex-direction: column; gap: 5px; min-height: 64px; font-size: 0.78rem; padding: 8px 4px; text-align: center; line-height: 1.2; }
+        nav.tabs button .num { width: 24px; height: 24px; font-size: 0.78rem; }
+        .stage { padding: 20px 18px; }
+        .modal { padding: 22px 20px 26px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-green" aria-hidden="true"></div>
+    <div class="blob blob-deep" aria-hidden="true"></div>
+    <div class="blob blob-red" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <header class="hero">
+        <p class="school">Westside Montessori Academy · Parent Advisory Council</p>
+        <h1>PAC <span class="accent">Systems</span> Guide</h1>
+        <p class="lede">Everything the PAC runs on, in plain language. Tap what you want to do, see how the process works — and where the automation quietly does the boring parts for you.</p>
+        <div class="red-rule" aria-hidden="true"></div>
+      </header>
+
+      <nav class="tabs glass" role="tablist" aria-label="Guide sections">
+        <button role="tab" id="tabbtn-1" aria-selected="true" aria-controls="panel-1" data-tab="1"><span class="num">1</span> I want to…</button>
+        <button role="tab" id="tabbtn-2" aria-selected="false" aria-controls="panel-2" data-tab="2"><span class="num">2</span> See the Magic</button>
+        <button role="tab" id="tabbtn-3" aria-selected="false" aria-controls="panel-3" data-tab="3"><span class="num">3</span> SOP Quick Reference</button>
+      </nav>
+
+      <!-- ============ TAB 1 ============ -->
+      <section class="panel active" id="panel-1" role="tabpanel" aria-labelledby="tabbtn-1">
+        <p class="panel-intro">Start with what you're holding or what you want to make happen. <strong>Every answer is two taps away.</strong></p>
+        <div class="tiles" id="tiles"></div>
+      </section>
+
+      <!-- ============ TAB 2 ============ -->
+      <section class="panel" id="panel-2" role="tabpanel" aria-labelledby="tabbtn-2">
+        <p class="panel-intro">Two everyday jobs, start to finish — watch how much of the work <strong>happens by itself</strong>. Step through at your own pace.</p>
+        <div class="journey-switch" role="group" aria-label="Choose a journey">
+          <button class="journey-tab active" data-journey="receipt" aria-pressed="true">🧾 The Receipt Journey</button>
+          <button class="journey-tab" data-journey="money" aria-pressed="false">💰 The Money Journey</button>
+        </div>
+        <div class="stage glass">
+          <div class="stage-head">
+            <span class="stage-count" id="stage-count"></span>
+            <span class="stage-tag" id="stage-tag"></span>
+          </div>
+          <div class="stage-visual" id="stage-visual"></div>
+          <h2 class="stage-title" id="stage-title"></h2>
+          <p class="stage-text" id="stage-text"></p>
+          <div class="stage-nav">
+            <button class="btn btn-ghost" id="btn-prev">← Back</button>
+            <div class="dots" id="dots" role="tablist" aria-label="Journey steps"></div>
+            <button class="btn btn-primary" id="btn-next">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TAB 3 ============ -->
+      <section class="panel" id="panel-3" role="tabpanel" aria-labelledby="tabbtn-3">
+        <p class="panel-intro">All ten SOPs from the PAC SOP Handbook, condensed to the rules that matter most. <strong>Tap any card to expand it.</strong></p>
+        <div class="sops" id="sops"></div>
+      </section>
+
+      <footer>
+        <p>PAC Systems Guide · Westside Montessori Academy PAC · SOPs 2026–2027 — the SOP Handbook is the source of truth.</p>
+        <div><a class="handbook-link" href="https://docs.google.com/document/d/1cc4MPYPGY4sxXTD8Gk9uRgETTvRoEV-E3dnXOLkSWb8/edit" target="_blank" rel="noopener noreferrer">Open the SOP Handbook <span aria-hidden="true">↗</span></a></div>
+      </footer>
+    </div>
+
+    <!-- ============ MODAL ============ -->
+    <div class="modal-backdrop" id="backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal">
+        <div class="modal-top">
+          <span class="icon" id="modal-icon"></span>
+          <h2 id="modal-title"></h2>
+          <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+        </div>
+        <p class="what" id="modal-what"></p>
+        <div id="modal-body"></div>
+        <h3>Where it lives</h3>
+        <div class="chips" id="modal-where"></div>
+        <h3>Covered by</h3>
+        <div class="chips" id="modal-sop"></div>
+      </div>
+    </div>
+<script>
+      "use strict";
+
+      var ICONS = {
+        receipt: '<svg viewBox="0 0 24 24"><path d="M6 3h12v18l-2-1.4L14 21l-2-1.4L10 21l-2-1.4L6 21z"/><path d="M9 8h6M9 12h6"/></svg>',
+        wallet: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><circle cx="16.8" cy="14.5" r="1.3"/></svg>',
+        calendar: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M12 13.2l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2-1.45-1.4 2-.3z"/></svg>',
+        bulb: '<svg viewBox="0 0 24 24"><path d="M9.5 18h5M10.5 21h3"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.5-1.1 1-1.1 1.7h-5c0-.7-.4-1.2-1.1-1.7A6 6 0 0 1 12 3z"/></svg>',
+        tag: '<svg viewBox="0 0 24 24"><path d="M3.5 12.5v-9h9l8 8-9 9z"/><circle cx="8" cy="8" r="1.6"/></svg>',
+        people: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 20c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17.2" cy="9.5" r="2.4"/><path d="M16 15.2c2.3.2 4 1.8 4.5 4.3"/></svg>',
+        folder: '<svg viewBox="0 0 24 24"><path d="M3.5 6.5A1.5 1.5 0 0 1 5 5h4l2 2.5h8A1.5 1.5 0 0 1 20.5 9v8.5A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"/></svg>',
+        question: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.8"/><path d="M9.6 9.4A2.6 2.6 0 1 1 12 12.4V14"/><circle cx="12" cy="17" r="0.4"/></svg>',
+        lock: '<svg class="lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>'
+      };
+
+      var LINKS = {
+        handbook: "https://docs.google.com/document/d/1cc4MPYPGY4sxXTD8Gk9uRgETTvRoEV-E3dnXOLkSWb8/edit",
+        tracker: "https://docs.google.com/spreadsheets/d/1XMdmU6ee3pUNMBoIjSp4yIq08k79bLyyvwrSPat_9JE/edit",
+        receipts: "https://drive.google.com/drive/folders/1eApUui6vRHykoLzhzeUISXk0wWihcLut",
+        drive: "https://drive.google.com/drive/folders/1HqpnPy5mWHgGo5Kn-fIUsDExxT1Rhkn3",
+        form: "https://docs.google.com/forms/d/e/1FAIpQLSfsEeuU2nwo5cGAZTaabPy8r0Ikh1a_Ho8e63Z4P4PX_PU-dA/viewform",
+        trello: "https://trello.com/b/uasXZwPG",
+        priorities: "https://docs.google.com/document/d/1hIH5w_rC8JXFLjZZSaWQx2uxZcU_eP9g1e944dC5cZ8/edit",
+        planner: "https://docs.google.com/document/d/1daUkHWSeOP-il-IFxHufQlbhIOcd7DtqSaJQZN_wfak/edit"
+      };
+      var SOP_TABS = {
+        1: "t.3zikylym380w", 2: "t.pnmlj1wfrgsy", 3: "t.15fzjsdt1gzr", 4: "t.7n3qicm08cdv", 5: "t.tyumfr6n3sjq",
+        6: "t.f3x8h3jfgyb4", 7: "t.vu8v2xu0w67j", 8: "t.2eyhfovclle", 9: "t.80bpjwnlppsa", 10: "t.z2m2fuk7vwe"
+      };
+      function ext(url, text) {
+        return '<a class="mock-link" href="' + url + '" target="_blank" rel="noopener noreferrer">' + text + ' <span aria-hidden="true">↗</span></a>';
+      }
+
+      var SCENARIOS = [
+        {
+          id: "receipt", icon: "receipt", title: "I have a receipt", sub: "For something you already bought for the PAC",
+          what: "Receipts are the PAC's proof of spending — and the system does most of the work. You drop the receipt in one folder; the scan and the tracker take it from there.",
+          steps: [
+            "Take a clear photo or scan of the receipt.",
+            "Drop it in the <strong>Event Receipts</strong> folder — the only receipts folder. Nowhere else.",
+            "The receipt scan picks it up automatically and creates your Payment Tracker row — never type a new row by hand.",
+            "Complete your row: <strong>Paid By, Amount, Account, Event/Project, Payee, Ref #</strong>.",
+            "Done — Gaming rows flow into the Gaming Ledger by themselves."
+          ],
+          where: [{ t: "Event Receipts folder", u: LINKS.receipts }, { t: "Payment Tracker", u: LINKS.tracker }], sop: 5
+        },
+        {
+          id: "spend", icon: "wallet", title: "I want to spend money / get reimbursed", sub: "Approval first — always",
+          what: "PAC money is spent by approval, not by habit. The Spending Approval form comes before any purchase, and two signatories sign off in writing before the status flips to APPROVED.",
+          steps: [
+            "<strong>Approval comes BEFORE spending.</strong> Fill in the Spending Approval form at the commitment point — use the pre-filled link on the Trello card if there is one.",
+            "The Suggested Account fills itself in; the Treasurer confirms Gaming items.",
+            "Two signatories approve in writing — from the three signatories (Treasurer, President, VP) — and the <strong>second approval must come from the President or VP</strong>. Status flips to APPROVED. Nobody approves a payment to themselves.",
+            "Pay the vendor directly where possible.",
+            "Receipt goes to Event Receipts; complete your tracker row."
+          ],
+          where: [{ t: "Spending Approval form", u: LINKS.form }, { t: "Payment Tracker", u: LINKS.tracker }], sop: 5
+        },
+        {
+          id: "event", icon: "calendar", title: "I want to create or run an event", sub: "At school or off-site — here's the path",
+          what: "Every event starts as a Trello card from the template, with one owner and a due date. Where the event happens decides what approvals it needs.",
+          steps: [
+            "<strong>At school or off-site?</strong> At-school events start at 5:45 pm and doors stay closed until 5:45. Off-site events need no school sign-off — research, optional family vote, PAC decides.",
+            "Create a Trello card from the event template: one owner, a due date, and the money trigger (what will be bought).",
+            "Signup sheet: always a <strong>COPY</strong> of the template — never edit the original.",
+            "Any spending goes through Spending Approval (see the money scenario)."
+          ],
+          where: [{ t: "Trello board", u: LINKS.trello }, { t: "Event & Fundraising Planner", u: LINKS.planner }], sop: 4
+        },
+        {
+          id: "grant", icon: "bulb", title: "I have a grant idea", sub: "Great — it follows a sequence",
+          what: "Grant ideas are welcome, but nothing reaches a PAC meeting before the Principal has weighed in. The sequence protects everyone's time — and the school's relationship with funders.",
+          steps: [
+            "The sequence is <strong>VP → President → Principal → exec team → PAC meeting</strong>. Nothing reaches a PAC meeting before the Principal has weighed in.",
+            "For most grants the applicant is <strong>Westside Montessori Academy Society</strong> — the exception is the BC Community Gaming Grant, where the PAC itself applies.",
+            "Add it to, and track it in, the Grant Tracker."
+          ],
+          where: [{ t: "Grant Tracker — PAC Priorities 2026–2027 doc", u: LINKS.priorities }, { t: "SOP 3 in the Handbook", u: LINKS.handbook + "?tab=" + SOP_TABS[3] }], sop: 3
+        },
+        {
+          id: "fundraiser", icon: "tag", title: "I want to sell something / run a fundraiser", sub: "Three questions decide the account",
+          what: "Which account a fundraiser belongs to isn't a guess — three questions decide it, and the Treasurer makes the final call on anything that might be Gaming.",
+          steps: [
+            "<strong>Are we selling anything?</strong> → Fundraising account.",
+            "<strong>Mainly for students and families, at cost?</strong> → Maybe Gaming — the Treasurer makes the final call.",
+            "<strong>The school's job, curriculum, or a banned item?</strong> → Never Gaming.",
+            "Sales run through Zeffy; class reps reconcile their classroom afterwards."
+          ],
+          where: ["Zeffy", { t: "Payment Tracker", u: LINKS.tracker }], sop: 6
+        },
+        {
+          id: "contact", icon: "people", title: "I need to contact the school / find a board member", sub: "Who does what — first names only",
+          what: "The fastest way to get something done is to ask the right person first. Here's who holds what.",
+          roles: [
+            { name: "Kathy", role: "President", desc: "Final calls and the school relationship." },
+            { name: "Lucy", role: "VP", desc: "Projects, grants, and systems." },
+            { name: "Jo", role: "Treasurer", desc: "Money and Gaming eligibility." },
+            { name: "Pam", role: "Principal", desc: "School approvals — grants and vendors go through her first." },
+            { name: "Lorelei", role: "Office", desc: "School logistics." },
+            { name: "Lance", role: "Bulletin & Media", desc: "Tuesday Bulletin items and notices for PAC events." },
+            { name: "Sarah", role: "Admissions", desc: "Clubs and rentals." }
+          ],
+          where: ["PAC board", "School office"], sop: 9
+        },
+        {
+          id: "file", icon: "folder", title: "I want to file a document", sub: "One copy, in the right folder",
+          what: "If a document can't be found, it might as well not exist. The Drive is organised by function, and there is exactly one copy of everything.",
+          steps: [
+            "File it in the <strong>functional folder</strong> for the topic — one copy only, no duplicates.",
+            "Meeting documents are named <strong>date-first (YYYY-MM-DD)</strong>.",
+            "File the final version in Drive; keep drafts clearly marked.",
+            "Receipts always go to Event Receipts — nowhere else."
+          ],
+          where: [{ t: "PAC 2026–2027 Drive folder", u: LINKS.drive }, { t: "Event Receipts folder", u: LINKS.receipts }], sop: 8
+        },
+        {
+          id: "question", icon: "question", title: "I have a question about how we do something", sub: "The SOP Handbook has the answer",
+          what: "Every PAC process lives in the SOP Handbook. Browse the quick reference in Tab 3 — all ten SOPs, condensed to the rules that matter.",
+          steps: [
+            "Open <strong>Tab 3 — SOP Reference</strong> and find your topic.",
+            "For announcements: Tuesday Bulletin items go to Lance — <strong>text by Monday, media/screen items by Friday</strong> — and cc all board members (SOP 2)."
+          ],
+          where: [{ t: "SOP Handbook", u: LINKS.handbook }, "Tab 3 of this guide"], sop: 2, gotoTab3: true
+        }
+      ];
+
+      var JOURNEYS = {
+        receipt: {
+          label: "The Receipt Journey",
+          slides: [
+            {
+              tag: "You do this", tagClass: "human",
+              title: "It starts with one folder",
+              text: "A board member drops a Costco receipt into the Event Receipts folder — the only receipts folder there is. That's the whole job.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.receipts, "📁 Event Receipts") + '</div><div class="mock-row"><span>🧾</span><span class="grow">Costco receipt — Harvest Festival supplies</span><span class="pill pill-pale">just dropped in</span></div><div class="mock-row"><span>🧾</span><span class="grow">Grocery receipt — Hot Lunch</span></div></div></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "The scanner runs by itself",
+              text: "On weekdays, the receipt scan runs on its own schedule — nobody has to remember, chase, or remind anyone.",
+              visual: '<div class="mock"><div class="scan-wrap"><div class="mock-card"><div class="mock-label">Receipt scan</div><div class="mock-line med"></div><div class="mock-line"></div><div class="mock-line short faint"></div></div><div class="scan-bar"></div></div><p class="mock-caption">Watching the Event Receipts folder…</p></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "A tracker row appears on its own",
+              text: "The scan creates a Payment Tracker row linked to the receipt. No one ever types a new row by hand.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.tracker, "Payment Tracker") + '</div><div class="mock-row"><span class="grow">Movie Night — popcorn supplies</span><span class="pill pill-green">logged</span></div><div class="mock-row new"><span class="grow">Costco — Harvest Festival supplies</span><span class="pill pill-red">new row</span></div><div class="mock-row"><span class="grow">Hot Lunch — pizza day</span><span class="pill pill-green">logged</span></div></div></div>'
+            },
+            {
+              tag: "You do this", tagClass: "human",
+              title: "She completes her row",
+              text: "Paid By, Amount, Account, Event, Payee, Ref #. That's the only typing anyone does in the whole process.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">Complete the row</div><div class="mock-row"><span class="grow">Paid By</span><span class="check">✓ filled</span></div><div class="mock-row"><span class="grow">Amount · Account · Event</span><span class="check">✓ filled</span></div><div class="mock-row"><span class="grow">Payee · Ref #</span><span class="check">✓ filled</span></div></div></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "The Gaming Ledger builds itself",
+              text: "A Gaming expense? The Gaming Ledger builds itself from Gaming rows — running balance ready for the year-end Gaming report.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">Gaming Ledger — self-building</div><div class="mock-row"><span class="grow">Gaming row flows in</span><span class="pill pill-green">auto</span></div><div class="mock-row"><span class="grow">Running balance updates</span><span class="pill pill-green">auto</span></div><div class="mock-row"><span class="grow">Year-end Gaming report</span><span class="pill pill-pale">ready</span></div></div></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "Nothing falls through the cracks",
+              text: "Loose end? On the 1st of the month, a digest reminds the Treasurer about incomplete rows. No manual data entry, no lost receipts.",
+              visual: '<div class="mock"><div class="mock-big"><span class="pulse">🎉</span></div><p class="mock-caption">Receipt filed · row complete · ledger current.<br/>Monthly digest watches for loose ends.</p></div>'
+            }
+          ]
+        },
+        money: {
+          label: "The Money Journey",
+          slides: [
+            {
+              tag: "You do this", tagClass: "human",
+              title: "It starts with a Trello card",
+              text: "A Trello card is created from the event template, with its money trigger — what will be bought, and roughly how much.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.trello, "🗂 Trello") + ' — Event card</div><div class="mock-row"><span class="grow"><strong>Harvest Festival</strong> — one owner · due date set</span></div><div class="mock-row new"><span>💸</span><span class="grow">Money trigger: decorations + snacks, ~$150</span></div></div></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "Monday: the money scan checks in",
+              text: "Monday, before the 7 pm check-in, the money scan flags new or changed money triggers, suggests the account split, and drafts a pre-filled Spending Approval link. It's read-only — it never edits the board.",
+              visual: '<div class="mock"><div class="scan-wrap"><div class="mock-card"><div class="mock-label">Monday money scan — read-only</div><div class="mock-row"><span>🚩</span><span class="grow">Harvest Festival — money trigger flagged</span></div><div class="mock-row"><span>🧮</span><span class="grow">Suggested split: Fundraising</span></div><div class="mock-row"><span>🔗</span><span class="grow">Draft pre-filled approval link ready</span></div></div><div class="scan-bar"></div></div></div>'
+            },
+            {
+              tag: "You do this", tagClass: "human",
+              title: "Approval before spending",
+              text: "The owner submits the real Spending Approval form — before any spending happens. No exceptions, no retroactive approvals.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.form, "Spending Approval form") + '</div><div class="mock-line med"></div><div class="mock-line"></div><div class="mock-line short faint"></div><div class="mock-row"><span class="grow">Submitted — before spending</span><span class="pill pill-green">✓</span></div></div></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "The tracker picks it up",
+              text: "The response lands in the Payment Tracker. The Suggested Account fills itself in; the Treasurer confirms Gaming items.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.tracker, "Payment Tracker") + '</div><div class="mock-row new"><span class="grow">Harvest Festival — $150</span><span class="pill pill-pale">Suggested: Fundraising</span></div><div class="mock-row"><span class="grow">Treasurer confirms Gaming items</span><span class="check">✓</span></div></div></div>'
+            },
+            {
+              tag: "The rule", tagClass: "human",
+              title: "Two signatories approve",
+              text: "Two signatories approve in writing — and the second approval must come from the President or VP. The status flips to APPROVED.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">Approvals</div><div class="mock-row"><span class="grow">Approval 1 of 2 — in writing</span><span class="check">✓</span></div><div class="mock-row"><span class="grow">Approval 2 of 2 — President or VP</span><span class="check">✓</span></div><div class="mock-row new"><span class="grow">Status</span><span class="pill pill-green">APPROVED</span></div></div></div>'
+            },
+            {
+              tag: "You do this", tagClass: "human",
+              title: "Pay, file, close the loop",
+              text: "The vendor is paid directly where possible. The receipt goes to Event Receipts — and the receipt scan closes the loop.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">Closing the loop</div><div class="mock-row"><span>💳</span><span class="grow">Vendor paid directly</span><span class="check">✓</span></div><div class="mock-row"><span>🧾</span><span class="grow">Receipt → ' + ext(LINKS.receipts, "Event Receipts folder") + '</span><span class="check">✓</span></div><div class="mock-row"><span>🔁</span><span class="grow">Receipt scan links it to the tracker</span><span class="pill pill-green">auto</span></div></div></div>'
+            },
+            {
+              tag: "✦ Automation", tagClass: "",
+              title: "Meanwhile, on the board itself",
+              text: "Trello adds the Urgent label 3 days before a due date, and moving a card to Done completes its due date automatically. Event food pre-orders run through Zeffy, paid out to the Fundraising account.",
+              visual: '<div class="mock"><div class="mock-card"><div class="mock-label">' + ext(LINKS.trello, "Trello") + ' Butler</div><div class="mock-row"><span class="grow">Due in 3 days</span><span class="pill pill-red">Urgent</span></div><div class="mock-row"><span class="grow">Card moved to Done</span><span class="pill pill-green">due date ✓</span></div></div><div class="mock-card"><div class="mock-label">Zeffy</div><div class="mock-row"><span class="grow">Food pre-orders → paid out to Fundraising</span><span class="pill pill-green">auto</span></div></div></div>'
+            }
+          ]
+        }
+      };
+
+      var SOPS = [
+        { n: 1, title: "Meeting Minutes", sum: "Board review → school review → publish.",
+          points: [
+            "Draft minutes go to the <strong>board first</strong> for review.",
+            "Then to the <strong>school</strong> for its review.",
+            "Only then are they <strong>published</strong> — in that order, every time."
+          ] },
+        { n: 2, title: "Communications & Tuesday Bulletin", sum: "Items to Lance: media by Friday, text by Monday; cc all board members.",
+          points: [
+            "Bulletin items go to <strong>Lance</strong>.",
+            "<strong>Media/screen items by Friday; text by Monday.</strong>",
+            "<strong>Cc all board members</strong> so nothing surprises anyone."
+          ] },
+        { n: 3, title: "School Approvals & Grants", sum: "VP → President → Principal before anything reaches a PAC meeting.",
+          points: [
+            "Sequence: <strong>VP → President → Principal → exec team → PAC meeting</strong>.",
+            "Nothing reaches a PAC meeting before the Principal has weighed in.",
+            "The <strong>Society</strong> applies for most grants; the <strong>PAC</strong> applies for the BC Community Gaming Grant.",
+            "Track everything in the <strong>Grant Tracker</strong> (PAC Priorities 2026–2027 doc)."
+          ] },
+        { n: 4, title: "Events", sum: "At school: 5:45 pm start, doors closed until then. Off-site: research, optional vote, PAC decides.",
+          points: [
+            "<strong>At school:</strong> events start at 5:45 pm; doors stay closed until 5:45.",
+            "<strong>Off-site:</strong> no school sign-off needed — research, optional family vote, PAC decides.",
+            "Start from the <strong>event template</strong> on Trello: one owner, one due date, money trigger noted.",
+            "Signup sheets are always a <strong>copy</strong> of the template — never edit the original."
+          ] },
+        { n: 5, title: "Money", sum: "Two Vancity accounts; approval before spending; receipts to Event Receipts.",
+          points: [
+            "Two Vancity accounts: <strong>Gaming</strong> (restricted) and <strong>Fundraising</strong> (general).",
+            "<strong>Spending Approval before spending</strong> — always.",
+            "Three signatories (Treasurer, President, VP); <strong>two approvals</strong> needed, and the <strong>second must come from the President or VP</strong>. Nobody approves a payment to themselves.",
+            "Receipts go to the <strong>Event Receipts</strong> folder — the scan creates the tracker row; you complete it.",
+            "Gaming rows build the <strong>Gaming Ledger</strong> automatically."
+          ] },
+        { n: 6, title: "Fundraising", sum: "Selling → Fundraising; maybe Gaming is the Treasurer's call; never Gaming has hard lines.",
+          points: [
+            "<strong>Selling anything?</strong> → Fundraising account.",
+            "<strong>Mainly for students and families, at cost?</strong> → Maybe Gaming — the Treasurer makes the final call.",
+            "<strong>The school's job, curriculum, or a banned item?</strong> → Never Gaming.",
+            "Sales run through <strong>Zeffy</strong>; class reps reconcile their classroom afterwards."
+          ] },
+        { n: 7, title: "Hot Lunch Setup & Food Vendors", sum: "PAC sets up MunchaLunch; new vendors need the Principal's approval first.",
+          points: [
+            "The PAC sets up <strong>MunchaLunch</strong> classes each year.",
+            "New food vendors need the <strong>Principal's approval first</strong> — before any commitment.",
+            "The <strong>Food Vendor Directory</strong> is for PAC meetings and events."
+          ] },
+        { n: 8, title: "Drive & Files", sum: "Functional folders, date-first names, one-copy rule.",
+          points: [
+            "File in the <strong>functional folder</strong> for the topic.",
+            "Meeting documents are named <strong>date-first (YYYY-MM-DD)</strong>.",
+            "<strong>One copy only</strong> — no duplicates; file the final version, mark drafts clearly.",
+            "<strong>Event Receipts</strong> is the one receipts folder."
+          ] },
+        { n: 9, title: "Roles & Contacts", sum: "Board exec and school contacts — first names only on this page.",
+          points: [
+            "Board exec: <strong>President, VP, Treasurer, 2 Secretaries, 2 members-at-large</strong>.",
+            "School contacts: <strong>Principal, Office, Bulletin & Media, Admissions</strong>.",
+            "See the <strong>“contact the school”</strong> scenario in Tab 1 for who holds what."
+          ] },
+        { n: 10, title: "Task Board (Trello)", sum: "One card per task, one owner, one next action, due date.",
+          points: [
+            "<strong>One card per task, one owner, one next action, a due date.</strong>",
+            "<strong>Decision Needed</strong> label marks go/no-go calls.",
+            "Updates happen at the <strong>Monday 7 pm check-in</strong>.",
+            "Butler adds the <strong>Urgent</strong> label 3 days before a due date; moving a card to Done completes its due date."
+          ] }
+      ];
+      /* ---------- tabs ---------- */
+      function showTab(n) {
+        var btns = document.querySelectorAll("nav.tabs button");
+        var panels = document.querySelectorAll("section.panel");
+        for (var i = 0; i < btns.length; i++) {
+          var on = btns[i].getAttribute("data-tab") === String(n);
+          btns[i].setAttribute("aria-selected", on ? "true" : "false");
+        }
+        for (var j = 0; j < panels.length; j++) {
+          panels[j].classList.toggle("active", panels[j].id === "panel-" + n);
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      var tabBtns = document.querySelectorAll("nav.tabs button");
+      for (var t = 0; t < tabBtns.length; t++) {
+        tabBtns[t].addEventListener("click", function () { showTab(this.getAttribute("data-tab")); });
+      }
+
+      /* ---------- tab 1: tiles + modal ---------- */
+      var tilesEl = document.getElementById("tiles");
+      SCENARIOS.forEach(function (s) {
+        var b = document.createElement("button");
+        b.className = "tile glass";
+        b.setAttribute("type", "button");
+        b.innerHTML = '<span class="icon">' + ICONS[s.icon] + '</span><span><span class="t-title">' + s.title + '</span><span class="t-sub">' + s.sub + "</span></span>" + '<span class="chev" aria-hidden="true">›</span>';
+        b.addEventListener("click", function () { openScenario(s); });
+        tilesEl.appendChild(b);
+      });
+
+      var backdrop = document.getElementById("backdrop");
+      var lastFocus = null;
+      function openScenario(s) {
+        lastFocus = document.activeElement;
+        document.getElementById("modal-icon").innerHTML = ICONS[s.icon];
+        document.getElementById("modal-title").textContent = s.title;
+        document.getElementById("modal-what").textContent = s.what;
+        var body = document.getElementById("modal-body");
+        if (s.roles) {
+          var ul = '<ul class="roles-list">';
+          s.roles.forEach(function (r) {
+            ul += '<li><span class="r-name">' + r.name + '</span><span class="r-role">' + r.role + '</span><span class="r-desc">' + r.desc + "</span></li>";
+          });
+          body.innerHTML = "<h3>Who to ask</h3>" + ul + "</ul>";
+        } else {
+          var ol = '<ol class="steps">';
+          s.steps.forEach(function (st) { ol += "<li>" + st + "</li>"; });
+          body.innerHTML = "<h3>The process</h3>" + ol + "</ol>";
+        }
+        var where = document.getElementById("modal-where");
+        where.innerHTML = "";
+        s.where.forEach(function (w) {
+          var label = typeof w === "string" ? w : w.t;
+          var url = typeof w === "string" ? null : w.u;
+          if (url) {
+            var a = document.createElement("a");
+            a.className = "chip chip-link";
+            a.href = url;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.innerHTML = ICONS.lock + "<span>" + label + ' · board sign-in required</span><span class="ext" aria-hidden="true">↗</span>';
+            where.appendChild(a);
+          } else {
+            var c = document.createElement("span");
+            c.className = "chip";
+            c.innerHTML = ICONS.lock + "<span>" + label + " · board sign-in required</span>";
+            where.appendChild(c);
+          }
+        });
+        var sop = document.getElementById("modal-sop");
+        sop.innerHTML = "";
+        var sc = document.createElement("span");
+        sc.className = "chip sop-chip";
+        if (s.gotoTab3) {
+          sc.innerHTML = '<button type="button">SOP ' + s.sop + " · Communications &amp; the Handbook → see Tab 3</button>";
+          sc.querySelector("button").addEventListener("click", function () { closeModal(); showTab(3); });
+        } else {
+          var sopName = SOPS[s.sop - 1].title;
+          sc.innerHTML = '<button type="button">SOP ' + s.sop + " · " + sopName + " → see Tab 3</button>";
+          sc.querySelector("button").addEventListener("click", function () {
+            closeModal(); showTab(3); openSop(s.sop); document.getElementById("sop-" + s.sop).scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+        }
+        sop.appendChild(sc);
+        backdrop.classList.add("open");
+        document.body.style.overflow = "hidden";
+        document.getElementById("modal-close").focus();
+      }
+      function closeModal() {
+        backdrop.classList.remove("open");
+        document.body.style.overflow = "";
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      }
+      document.getElementById("modal-close").addEventListener("click", closeModal);
+      backdrop.addEventListener("click", function (e) { if (e.target === backdrop) closeModal(); });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && backdrop.classList.contains("open")) closeModal();
+      });
+
+      /* ---------- tab 2: journeys ---------- */
+      var journey = "receipt", slide = 0;
+      var stageCount = document.getElementById("stage-count");
+      var stageTag = document.getElementById("stage-tag");
+      var stageVisual = document.getElementById("stage-visual");
+      var stageTitle = document.getElementById("stage-title");
+      var stageText = document.getElementById("stage-text");
+      var dotsEl = document.getElementById("dots");
+      var btnPrev = document.getElementById("btn-prev");
+      var btnNext = document.getElementById("btn-next");
+
+      function renderSlide() {
+        var j = JOURNEYS[journey];
+        var s = j.slides[slide];
+        stageCount.textContent = j.label + " · Step " + (slide + 1) + " of " + j.slides.length;
+        stageTag.textContent = s.tag;
+        stageTag.className = "stage-tag" + (s.tagClass ? " " + s.tagClass : "");
+        stageVisual.innerHTML = s.visual;
+        stageTitle.textContent = s.title;
+        stageText.textContent = s.text;
+        btnPrev.disabled = slide === 0;
+        btnNext.textContent = slide === j.slides.length - 1 ? "↺ Start over" : "Next →";
+        dotsEl.innerHTML = "";
+        j.slides.forEach(function (_, i) {
+          var d = document.createElement("button");
+          d.type = "button";
+          d.className = "dot" + (i === slide ? " current" : i < slide ? " done" : "");
+          d.setAttribute("aria-label", "Go to step " + (i + 1));
+          d.addEventListener("click", function () { slide = i; renderSlide(); });
+          dotsEl.appendChild(d);
+        });
+      }
+      btnPrev.addEventListener("click", function () { if (slide > 0) { slide--; renderSlide(); } });
+      btnNext.addEventListener("click", function () {
+        var len = JOURNEYS[journey].slides.length;
+        slide = slide === len - 1 ? 0 : slide + 1;
+        renderSlide();
+      });
+      var jTabs = document.querySelectorAll(".journey-tab");
+      for (var k = 0; k < jTabs.length; k++) {
+        jTabs[k].addEventListener("click", function () {
+          journey = this.getAttribute("data-journey");
+          slide = 0;
+          for (var m = 0; m < jTabs.length; m++) {
+            var on = jTabs[m] === this;
+            jTabs[m].classList.toggle("active", on);
+            jTabs[m].setAttribute("aria-pressed", on ? "true" : "false");
+          }
+          renderSlide();
+        });
+      }
+      document.addEventListener("keydown", function (e) {
+        if (!document.getElementById("panel-2").classList.contains("active")) return;
+        if (backdrop.classList.contains("open")) return;
+        if (e.key === "ArrowRight") btnNext.click();
+        if (e.key === "ArrowLeft") btnPrev.click();
+      });
+      renderSlide();
+
+      /* ---------- tab 3: SOP accordion ---------- */
+      var sopsEl = document.getElementById("sops");
+      function openSop(n) {
+        var el = document.getElementById("sop-" + n);
+        if (el) {
+          el.classList.add("open");
+          el.querySelector(".sop-head").setAttribute("aria-expanded", "true");
+        }
+      }
+      SOPS.forEach(function (s) {
+        var card = document.createElement("div");
+        card.className = "sop glass";
+        card.id = "sop-" + s.n;
+        var lis = "";
+        s.points.forEach(function (p) { lis += "<li>" + p + "</li>"; });
+        card.innerHTML =
+          '<button class="sop-head" type="button" aria-expanded="false">' +
+          '<span class="sop-num">' + s.n + "</span>" +
+          '<span><span class="sop-title">' + s.title + '</span><span class="sop-sum">' + s.sum + "</span></span>" +
+          '<span class="sop-chev" aria-hidden="true">⌄</span></button>' +
+          '<div class="sop-body"><ul>' + lis + "</ul>" +
+          '<a class="sop-link" href="' + LINKS.handbook + "?tab=" + SOP_TABS[s.n] + '" target="_blank" rel="noopener noreferrer">Read the full SOP in the Handbook <span aria-hidden="true">↗</span></a></div>';
+        card.querySelector(".sop-head").addEventListener("click", function () {
+          var open = card.classList.toggle("open");
+          this.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        sopsEl.appendChild(card);
+      });
+    </script>
+</body>
+</html>
